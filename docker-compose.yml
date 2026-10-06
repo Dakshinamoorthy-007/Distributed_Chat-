@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: distributed-chat-postgres
+    environment:
+      POSTGRES_DB: chatdb
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatuser -d chatdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: distributed-chat-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server-1:
+    build:
+      context: ./distributed-chat-backend
+      dockerfile: Dockerfile
+    container_name: distributed-chat-server-1
+    environment:
+      SERVER_ID: server-1
+      SERVER_PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: chatdb
+      DB_USERNAME: chatuser
+      DB_PASSWORD: chatpass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  server-2:
+    build:
+      context: ./distributed-chat-backend
+      dockerfile: Dockerfile
+    container_name: distributed-chat-server-2
+    environment:
+      SERVER_ID: server-2
+      SERVER_PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: chatdb
+      DB_USERNAME: chatuser
+      DB_PASSWORD: chatpass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: distributed-chat-backend/nginx/Dockerfile
+    container_name: distributed-chat-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - server-1
+      - server-2
+
+volumes:
+  postgres_data:

@@ -1,0 +1,31 @@
+Distributed Chat contract validation
+PASS Conversation listing GET contract
+PASS Conversation creation POST contract
+PASS Conversation membership POST contract
+PASS Conversation members GET contract
+PASS History GET contract
+PASS Presence GET contract
+PASS User conversation repository query exists
+PASS Conversation service uses membership query
+PASS Frontend calls conversation listing
+PASS Frontend calls conversation creation
+PASS Frontend calls membership API
+PASS Frontend calls members API
+PASS Frontend calls history API
+PASS Frontend calls presence API
+PASS WebSocket URL matches backend contract
+PASS WebSocket payload excludes userId
+PASS Frontend handles CONNECTED event
+PASS Frontend handles WebSocket MESSAGE event
+PASS Frontend handles server rejection codes
+PASS Nginx proxies REST to backend pool
+PASS Nginx proxies WebSocket with upgrade
+PASS Compose includes two backend instances
+PASS Compose includes Postgres and Redis
+PASS Compose builds integrated Nginx frontend image
+
+2026-09-29 websocket parser recheck: PASS
+Strict TypeScript compile of src/types/chat.ts and src/services/websocket.ts: PASS
+Backend ERROR payload contract uses `error`; frontend now consumes `event.error`: PASS
+
+PASS  stale WebSocket callback guard
